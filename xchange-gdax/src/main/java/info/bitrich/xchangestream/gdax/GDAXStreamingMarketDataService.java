@@ -70,8 +70,13 @@ public class GDAXStreamingMarketDataService implements StreamingMarketDataServic
                         asks.put(currencyPair, new TreeMap<>());
                     }
 
-                    GDAXProductBook productBook = s.toGDAXProductBook(bids.get(currencyPair), asks.get(currencyPair), maxDepth);
-                    return adaptOrderBook(productBook, currencyPair);
+                    // GDAXProductBook productBook = s.toGDAXProductBook(bids.get(currencyPair), asks.get(currencyPair), maxDepth);
+                    // return an orderbook only containing the new entries
+                    GDAXProductBook productBook = s.toGDAXProductBook(new TreeMap<BigDecimal, String>(java.util.Collections.reverseOrder()),
+                    		new TreeMap<BigDecimal, String>(), maxDepth);
+                    OrderBook ret = adaptOrderBook(productBook, currencyPair);
+                    ret.setOrderBookType(s.getType().equals("snapshot"));
+                    return ret;
                 });
     }
 

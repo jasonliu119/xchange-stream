@@ -10,6 +10,11 @@
     <artifactId>xchange-gdax</artifactId>
 
     <dependencies>
+         <dependency>
+            <groupId>org.knowm.xchange</groupId>
+            <artifactId>xchange-gdax</artifactId>
+            <version>6.1</version>
+        </dependency>
         <dependency>
             <groupId>info.bitrich.xchange-stream</groupId>
             <artifactId>xchange-stream-core</artifactId>
@@ -19,11 +24,6 @@
             <groupId>info.bitrich.xchange-stream</groupId>
             <artifactId>service-netty</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.knowm.xchange</groupId>
-            <artifactId>xchange-gdax</artifactId>
-            <version>${xchange.version}</version>
         </dependency>
     </dependencies>
 </project> 

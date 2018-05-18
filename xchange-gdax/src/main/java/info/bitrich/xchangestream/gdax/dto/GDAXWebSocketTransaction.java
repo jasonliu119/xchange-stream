@@ -39,6 +39,7 @@ public class GDAXWebSocketTransaction {
     private final long tradeId;
     private final String makerOrderId;
     private final String takenOrderId;
+    static private final String FAKE_ORDER_ID = "1";
 
     public GDAXWebSocketTransaction(
             @JsonProperty("type") String type,
@@ -116,7 +117,7 @@ public class GDAXWebSocketTransaction {
             if (maxDepth > 0 && currentDepth > maxDepth) continue;
             String volume = level.getValue();
             if (!volume.equals("0")) {
-                levels.add(new String[]{level.getKey().toString(), volume, "1"});
+                levels.add(new String[]{level.getKey().toString(), volume, FAKE_ORDER_ID});
                 currentDepth++;
             }
         }

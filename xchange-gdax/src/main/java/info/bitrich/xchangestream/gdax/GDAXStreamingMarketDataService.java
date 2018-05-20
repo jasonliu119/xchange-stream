@@ -16,6 +16,10 @@ import org.knowm.xchange.gdax.dto.marketdata.GDAXTrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -31,6 +35,11 @@ public class GDAXStreamingMarketDataService implements StreamingMarketDataServic
     private final GDAXStreamingService service;
     private Map<CurrencyPair, SortedMap<BigDecimal, String>> bids = new HashMap<>();
     private Map<CurrencyPair, SortedMap<BigDecimal, String>> asks = new HashMap<>();
+    
+    private static Date covertISOToDate(String iso_time) {
+    	LocalDateTime ldt = LocalDateTime.parse(iso_time, DateTimeFormatter.ISO_DATE_TIME);
+        return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+    }
 
     GDAXStreamingMarketDataService(GDAXStreamingService service) {
         this.service = service;
@@ -74,7 +83,12 @@ public class GDAXStreamingMarketDataService implements StreamingMarketDataServic
                     // return an orderbook only containing the new entries
                     GDAXProductBook productBook = s.toGDAXProductBook(new TreeMap<BigDecimal, String>(java.util.Collections.reverseOrder()),
                     		new TreeMap<BigDecimal, String>(), maxDepth);
-                    OrderBook ret = adaptOrderBook(productBook, currencyPair);
+
+                    Date date = new Date();
+                    if (s.getTime() != null && !s.getTime().isEmpty() && !s.getTime().equals("null")) {
+                    	date = covertISOToDate(s.getTime());
+                    }
+                    OrderBook ret = adaptOrderBook(productBook, currencyPair, date);
                     ret.setOrderBookType(s.getType().equals("snapshot"));
                     return ret;
                 });
@@ -148,6 +162,8 @@ public class GDAXStreamingMarketDataService implements StreamingMarketDataServic
                         message.getProductId().equals(channelName))
                 .map(s -> {
                             Trades adaptedTrades = adaptTrades(new GDAXTrade[]{s.toGDAXTrade()}, currencyPair);
+                            // Caveat 1: The XChange GDAXAdapters reports that sell means buy in trade API.
+                            // Caveat 2: The GDAX API reference says that the messages might be dropped in matches channel.
                             return adaptedTrades.getTrades().get(0);
                         }
                 );
